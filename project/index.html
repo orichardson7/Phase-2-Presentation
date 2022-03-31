@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>National Housing Supply</title>
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+
+    <style>
+        
+        h3{
+            font-family: Helvetica;
+        }
+    .line{
+       fill:rgb(112, 128, 197);
+       stroke-width: 1px;
+       stroke: navy;
+       fill-opacity: 50%;
+   }
+   
+    </style>
+</head>
+<body>
+<h3>
+    US National Housing Data 2018-2022 
+</h3>
+<div id="container" style="width: 100%" > </div>
+<script>
+    let svg = d3.selectAll('#container')
+        .append('svg')
+        .attr('width','80%')
+        .attr('height','60vw')
+        .attr('viewBox','0 0 800 500')
+    .style('background-color','#f5f3f3');
+    let margins = 75;
+    let width = 800 - 2 * margins;
+    let height = 500 - 2 * margins;
+
+    const loadData = d3.csv("https://raw.githubusercontent.com/rkg5142/dataviz-project/main/Inventory.csv",
+        function(d) {
+        return {
+        Date: new Date(d.Date),
+        Inventory: Number(d.Inventory)
+        }
+    })
+
+    loadData.then(data => {
+        let x = d3.scaleTime()
+            .domain(d3.extent(data, function(d) { return d.Date; }))
+            .range([margins, width]);
+        let y = d3.scaleLinear()
+            .domain([d3.min(data, function(d) { return d.Inventory; }),
+                     d3.max(data, function(d) { return d.Inventory; })])
+            .range([height, margins]);
+
+        let line = d3.line()
+            .x(function(d) { return x(d.Date); })
+            .y(function(d) { return y(d.Inventory); });
+        
+        svg.append("path")
+            .data([data])
+            .attr("class", "line")
+            .attr("d", line); 
+
+        svg.append("g")
+            .attr("transform", "translate("+ '0' + "," + height + ")")
+            .call(d3.axisBottom(x));
+
+        svg.append("g")
+            .attr("transform", "translate("+ margins + "," + '0' + ")")
+            .call(d3.axisLeft(y));
+
+    });
+
+
+</script>
+</body>
+</html>
